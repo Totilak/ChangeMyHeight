@@ -1,0 +1,12 @@
+name: ChangeMyHeight
+version: ${version}
+main: ru.edenor.changeMyHeight.ChangeMyHeight
+api-version: '1.21.7'
+authors: [ Totilak ]
+description: desc
+folia-supported: true
+permissions:
+  cmh.give:
+    description: Права для выдачи зелий
+  cmh.use:
+    description: Права для использований плагина, как игрок
