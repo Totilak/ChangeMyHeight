@@ -40,12 +40,12 @@ class PotionArgumentType : CustomArgumentType<String, String> {
 
   override fun <S : Any> parse(reader: StringReader, source: S): String {
     if (source !is CommandSourceStack) {
-      throw ru.edenor.changeMyHeight.command.PotionArgumentType.Companion.ERROR_BAD_SOURCE.create()
+      throw ERROR_BAD_SOURCE.create()
     }
 
     val filter = nativeType.parse(reader)
 
-    if (!ru.edenor.changeMyHeight.command.PotionArgumentType.Companion.potionList.contains(
+    if (!potionList.contains(
         filter)) {
       throw ERROR_POTION_NOT_FOUND.create(filter)
     }
