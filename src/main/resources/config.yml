@@ -1,0 +1,16 @@
+potions:
+  shrink:
+    title: ''
+    scale: 0.5
+    color: 'LIME'
+    durationSecond: 60
+  normal:
+    title: ''
+    scale: 1.0
+    color: 'AQUA'
+    durationSecond: 60
+  giant:
+    title: ''
+    scale: '2.0'
+    color: 'RED'
+    durationSecond: 60

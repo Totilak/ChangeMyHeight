@@ -14,13 +14,17 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
 import ru.edenor.changeMyHeight.command.Command
+import ru.edenor.changeMyHeight.data.ConfigStorage
+import ru.edenor.changeMyHeight.data.Storage
 import java.util.*
 
 class ChangeMyHeight : JavaPlugin(), Listener {
 
   private val activeTasks: MutableMap<UUID, BukkitTask> = mutableMapOf()
+  lateinit var storage: Storage
 
   override fun onEnable() {
+    storage = ConfigStorage(this)
     sizeKey = NamespacedKey(this, "size-potion")
     remainingKey = NamespacedKey(this, "size-remaining")
     startKey = NamespacedKey(this, "size-start")
@@ -28,7 +32,7 @@ class ChangeMyHeight : JavaPlugin(), Listener {
     server.pluginManager.registerEvents(this, this)
 
     lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
-      Command(this).commands().forEach { commands.registrar().register(it) }
+      Command(this, storage).commands().forEach { commands.registrar().register(it) }
     }
 
     logger.info("ChangeMyHeight enabled!")
@@ -39,6 +43,10 @@ class ChangeMyHeight : JavaPlugin(), Listener {
     activeTasks.values.forEach { it.cancel() }
     activeTasks.clear()
     logger.info("ChangeMyHeight disabled!")
+  }
+
+  fun reload(){
+    storage.reload()
   }
 
   @EventHandler
@@ -168,6 +176,8 @@ class ChangeMyHeight : JavaPlugin(), Listener {
   companion object {
     const val GIVE_PERMISSION = "cmh.give"
     const val USE_PERMISSION = "cmh.use"
+    const val POTION_SECTION = "potions"
+    const val POTION_FILENAME = "config.yml"
     lateinit var sizeKey: NamespacedKey
     lateinit var remainingKey: NamespacedKey
     lateinit var startKey: NamespacedKey

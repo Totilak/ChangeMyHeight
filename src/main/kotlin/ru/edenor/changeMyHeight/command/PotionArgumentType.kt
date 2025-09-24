@@ -12,9 +12,10 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.MessageComponentSerializer
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType
 import net.kyori.adventure.text.Component
+import ru.edenor.changeMyHeight.data.Storage
 import java.util.concurrent.CompletableFuture
 
-class PotionArgumentType : CustomArgumentType<String, String> {
+class PotionArgumentType(private val storage: Storage) : CustomArgumentType<String, String> {
   companion object {
     @JvmStatic
     val ERROR_BAD_SOURCE =
@@ -62,3 +63,6 @@ class PotionArgumentType : CustomArgumentType<String, String> {
     return builder.buildFuture()
   }
 }
+
+/*TODO
+*  добавить список всех зелий, заменить хардкод*/

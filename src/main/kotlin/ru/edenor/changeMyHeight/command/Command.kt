@@ -26,26 +26,34 @@ import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.sizeKey
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresAnyPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.simplyRun
+import ru.edenor.changeMyHeight.data.Storage
 
-class Command(private val plugin: ChangeMyHeight) {
+class Command(private val plugin: ChangeMyHeight, private val storage: Storage) {
   fun commands() = arrayOf(cmh)
 
   private val giveSection =
       literal("give")
           .requiresPermission(GIVE_PERMISSION)
           .then(
-              argument("potion", PotionArgumentType())
+              argument("potion", PotionArgumentType(storage))
                   .then(
                       argument("username", ArgumentTypes.playerProfiles()).simplyRun(::givePotion)))
 
+  private val listSection = literal("list").requiresAnyPermission().simplyRun(::sendList)
+
   private val checkSection = literal("check").requiresAnyPermission().simplyRun(::checkPotionEffect)
+
+  private val reloadSection =
+      literal("reload").requiresPermission(GIVE_PERMISSION).simplyRun(::reload)
 
   private val cmh =
       literal("cmh")
           .requiresAnyPermission()
           .simplyRun(::sendHelp)
+          .then(listSection)
           .then(giveSection)
           .then(checkSection)
+          .then(reloadSection)
           .build()
 
   private fun sendHelp(sender: CommandSender) {
@@ -54,12 +62,22 @@ class Command(private val plugin: ChangeMyHeight) {
 
     if (sender.hasPermission(USE_PERMISSION)) {
       sender.sendRichMessage("<green>/cmh check <yellow>- Показать активные эффекты")
+      sender.sendRichMessage("<green>/cmh list <yellow>- Показать доступные зелья")
     }
 
     if (sender.hasPermission(GIVE_PERMISSION)) {
-      sender.sendRichMessage(
-          "<green>/cmh give <potion_name> <username> <yellow> - Выдать зелье игроку")
+      sender.sendRichMessage("<green>/cmh give <potion_name> <username> <yellow> - Выдать зелье игроку")
+      sender.sendRichMessage("<green>/cmh reload <yellow>- Перезагружает конфигурацию плагина")
     }
+  }
+
+  private fun sendList(sender: CommandSender) {
+    PotionListMessanger.sendlist(sender, storage)
+  }
+
+  private fun reload(sender: CommandSender) {
+    plugin.reload()
+    sender.sendRichMessage("<green>Настройки успешно перезагружены")
   }
 
   private fun givePotion(context: CommandContext<CommandSourceStack>) {
