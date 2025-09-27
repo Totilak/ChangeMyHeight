@@ -1,11 +1,13 @@
 package ru.edenor.changeMyHeight.data
 
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.POTION_FILENAME
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.POTION_SECTION
 import java.nio.file.Files
+import java.time.Duration
 
 class ConfigStorage(private val plugin: ChangeMyHeight) : Storage {
 
@@ -45,7 +47,8 @@ class ConfigStorage(private val plugin: ChangeMyHeight) : Storage {
         name = section.name,
         title = section.getString("title") ?: "No name",
         scale = section.getDouble("scale"),
-        color = section.getString("color") ?: "RED",
-        durationSecond = section.getLong("durationSecond"))
+        color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
+        duration = Duration.ofSeconds(section.getLong("duration")),
+        description = section.getString("description") ?: "No description")
   }
 }

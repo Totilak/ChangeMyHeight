@@ -28,11 +28,6 @@ class PotionArgumentType(private val storage: Storage) : CustomArgumentType<Stri
       MessageComponentSerializer.message()
           .serialize(Component.text("$it не является доступным зельем!"))
     }
-
-    fun getArgument(argument: String, context: CommandContext<CommandSourceStack>): String =
-        context.getArgument(argument, String::class.java)
-
-    val potionList: List<String> = listOf("shrink", "normal", "giant")
   }
 
   override fun parse(reader: StringReader): String = reader.readUnquotedString()
@@ -45,11 +40,11 @@ class PotionArgumentType(private val storage: Storage) : CustomArgumentType<Stri
     }
 
     val filter = nativeType.parse(reader)
-
-    if (!potionList.contains(
-        filter)) {
+    if (filter == null) {
       throw ERROR_POTION_NOT_FOUND.create(filter)
     }
+
+    val potion = storage.getPotion(filter) ?: throw ERROR_POTION_NOT_FOUND.create(filter)
 
     return filter
   }
@@ -58,11 +53,8 @@ class PotionArgumentType(private val storage: Storage) : CustomArgumentType<Stri
       context: CommandContext<S>,
       builder: SuggestionsBuilder
   ): CompletableFuture<Suggestions> {
-    potionList.filter { it.startsWith(builder.remaining) }.forEach { builder.suggest(it) }
+    storage.getPotions().forEach { builder.suggest(it.name) }
 
     return builder.buildFuture()
   }
 }
-
-/*TODO
-*  добавить список всех зелий, заменить хардкод*/

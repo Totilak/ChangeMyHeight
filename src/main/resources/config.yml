@@ -1,16 +1,19 @@
 potions:
   shrink:
-    title: ''
+    title: 'Крошик'
     scale: 0.5
-    color: 'LIME'
-    durationSecond: 60
+    color: '#bfff00'
+    duration: 60
+    description: "Уменьшает в 2 раза"
   normal:
-    title: ''
+    title: 'Нормализатор'
     scale: 1.0
-    color: 'AQUA'
-    durationSecond: 60
+    color: '#00ffff'
+    duration: 60
+    description: "Нормализует ваш размер"
   giant:
-    title: ''
-    scale: '2.0'
-    color: 'RED'
-    durationSecond: 60
+    title: 'Гигантизм'
+    scale: 2.0
+    color: '#ff0000'
+    duration: 60
+    description: "Увеличивает размер в 2 раза"
