@@ -7,6 +7,7 @@ import io.papermc.paper.command.brigadier.Commands.argument
 import io.papermc.paper.command.brigadier.Commands.literal
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver
+import io.papermc.paper.util.Tick
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
@@ -15,12 +16,11 @@ import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.GIVE_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.USE_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.potionNameKey
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.remainingKey
-import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.startKey
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresAnyPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.simplyRun
+import ru.edenor.changeMyHeight.data.Potion
 import ru.edenor.changeMyHeight.data.Storage
-import java.time.Duration
 
 class Command(private val plugin: ChangeMyHeight, private val storage: Storage) {
   fun commands() = arrayOf(cmh)
@@ -102,13 +102,8 @@ class Command(private val plugin: ChangeMyHeight, private val storage: Storage) 
       return
     }
 
-    val potionType: String = context.getArgument("potion", String::class.java)
-    val potion = storage.getPotion(potionType)
-
-    if (potion == null) {
-      sender.sendRichMessage("<red>Такого зелья не существует!")
-    }
-    val itemPotion = potion!!.makePotion()
+    val potion: Potion = context.getArgument("potion", Potion::class.java)
+    val itemPotion = potion.makePotion()
 
     val leftover = player.inventory.addItem(itemPotion)
     if (leftover.isNotEmpty()) {
@@ -127,21 +122,17 @@ class Command(private val plugin: ChangeMyHeight, private val storage: Storage) 
 
     val pdc = sender.persistentDataContainer
     val remaining = pdc.get(remainingKey, PersistentDataType.LONG)
-    val start = pdc.get(startKey, PersistentDataType.LONG)
 
-    if (remaining == null || start == null) {
+    if (remaining == null) {
       sender.sendRichMessage("<gray>На вас сейчас <red>нет</red> активных эффектов!</gray>")
       return
     }
 
-    val potionName = pdc.get(potionNameKey, PersistentDataType.STRING) ?: return
+    val potionName = pdc.get(potionNameKey, PersistentDataType.STRING)!!
     val potion = storage.getPotion(potionName)!!
     val potionColor = potion.color
 
-    val elapsed = System.currentTimeMillis() - start
-    val timeLeft = (remaining - elapsed).coerceAtLeast(0)
-    val timeLeftText = PotionListMessenger.pluralDuration(Duration.ofMillis(timeLeft))
-
+    val timeLeftText = PotionListMessenger.pluralDuration(Tick.of(remaining))
     sender.sendRichMessage(
         "<green>На вас действует зелье <gray>[</gray>" +
             "<hover:show_text:'${potion.description}'><${potionColor}>${potion.title}</${potionColor}></hover>" +
