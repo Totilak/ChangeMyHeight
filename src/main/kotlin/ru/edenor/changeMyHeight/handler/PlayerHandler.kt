@@ -18,6 +18,12 @@ class PlayerHandler : Listener {
   fun onDrink(event: PlayerItemConsumeEvent) {
     val player = event.player
     val item = event.item
+
+    if (item.type == Material.MILK_BUCKET) {
+      ChangeMyHeightService.onPotionExpiration(player)
+      return
+    }
+
     if (item.type != Material.POTION || !item.hasItemMeta()) return
 
     val pdc = item.itemMeta.persistentDataContainer
@@ -25,6 +31,7 @@ class PlayerHandler : Listener {
     val potion = storage.getPotion(potionName) ?: return
 
     ChangeMyHeightService.applyPotion(player, potion)
+    ChangeMyHeightService.effectOnDrink(player,potion)
   }
 
   @EventHandler

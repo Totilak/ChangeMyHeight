@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Particle
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.persistence.PersistentDataType
@@ -19,7 +20,8 @@ data class Potion(
     val scale: Double,
     val color: TextColor,
     val duration: Duration,
-    val description: String
+    val description: String,
+    val particleType: Particle?
 ) {
   val key: NamespacedKey
     get() = NamespacedKey(ChangeMyHeight.plugin, name)
@@ -27,8 +29,7 @@ data class Potion(
   fun makePotion(): ItemStack {
     val item = ItemStack(Material.POTION)
     item.editMeta(PotionMeta::class.java) { meta ->
-      meta.displayName(Component.text(title, color)
-        .decoration(TextDecoration.ITALIC, false))
+      meta.displayName(Component.text(title, color).decoration(TextDecoration.ITALIC, false))
 
       val bukkitColor = Color.fromRGB(color.red(), color.green(), color.blue())
       meta.color = bukkitColor

@@ -2,7 +2,6 @@ package ru.edenor.changeMyHeight
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import io.papermc.paper.util.Tick
-import java.util.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
@@ -13,6 +12,7 @@ import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.remainingKey
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.storage
 import ru.edenor.changeMyHeight.command.PotionListMessenger
 import ru.edenor.changeMyHeight.data.Potion
+import java.util.*
 
 object ChangeMyHeightService {
 
@@ -91,6 +91,16 @@ object ChangeMyHeightService {
   fun clearPdc(pdc: PersistentDataContainer) {
     pdc.remove(remainingKey)
     pdc.remove(potionNameKey)
+  }
+
+  fun effectOnDrink(player: Player, potion: Potion) {
+    val particle = potion.particleType ?: return
+    player.world.spawnParticle(
+      particle,
+      player.location.add(0.0, 1.0, 0.0),
+      40,
+      0.5, 1.0, 0.5
+    )
   }
 
   fun sendPotionInfo(player: Player) {

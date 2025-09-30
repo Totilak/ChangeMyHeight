@@ -14,7 +14,6 @@ class ChangeMyHeight : JavaPlugin() {
 
   override fun onEnable() {
     plugin = this
-    saveDefaultConfig()
     storage = ConfigStorage(this.config)
 
     remainingKey = NamespacedKey(this, "size_remaining")
