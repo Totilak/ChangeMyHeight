@@ -57,9 +57,7 @@ object ChangeMyHeightService {
         player.getAttribute(Attribute.SCALE)
             ?: throw IllegalStateException("Player ${player.name} has no attribute scale!")
 
-    playerAttributeScale.modifiers
-      .filter { it.key.namespace == ChangeMyHeight.plugin.name.lowercase(Locale.ROOT) }
-      .forEach { playerAttributeScale.removeModifier(it) }
+    removeModifiers(player)
 
     val baseScale = playerAttributeScale.baseValue
     val resultScale = potion.scale - baseScale
