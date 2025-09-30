@@ -2,7 +2,8 @@ name: ChangeMyHeight
 version: ${version}
 main: ru.edenor.changeMyHeight.ChangeMyHeight
 api-version: '1.21.7'
-authors: [ Totilak ]
+author: Totilak
+contributors: [WesOrangePower]
 description: desc
 folia-supported: true
 permissions:
