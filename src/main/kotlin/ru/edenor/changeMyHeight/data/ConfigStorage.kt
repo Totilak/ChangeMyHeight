@@ -1,6 +1,8 @@
 package ru.edenor.changeMyHeight.data
 
 import net.kyori.adventure.text.format.TextColor
+import org.bukkit.NamespacedKey
+import org.bukkit.Particle
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.ConfigurationSection
 import ru.edenor.changeMyHeight.ChangeMyHeight
@@ -16,9 +18,9 @@ class ConfigStorage(private var config: Configuration) : Storage {
   override fun getPotions(): List<Potion> {
     val section = config.getConfigurationSection(POTION_SECTION) ?: return listOf()
     return section
-      .getKeys(false)
-      .map { k -> section.getConfigurationSection(k)!! }
-      .map { s -> readTemplate(s) }
+        .getKeys(false)
+        .map { k -> section.getConfigurationSection(k)!! }
+        .map { s -> readTemplate(s) }
   }
 
   override fun getPotion(name: String): Potion? {
@@ -36,11 +38,26 @@ class ConfigStorage(private var config: Configuration) : Storage {
 
   private fun readTemplate(section: ConfigurationSection): Potion {
     return Potion(
-      name = section.name,
-      title = section.getString("title") ?: "No name",
-      scale = section.getDouble("scale"),
-      color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
-      duration = Duration.ofSeconds(section.getLong("duration")),
-      description = section.getString("description") ?: "No description")
+        name = section.name,
+        title = section.getString("title") ?: "No name",
+        attributes =
+            parseAttributes(
+                section.getConfigurationSection("attributes")
+                    ?: throw IllegalArgumentException("${section.name} has no attributes!")),
+        color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
+        duration = Duration.ofSeconds(section.getLong("duration")),
+        description = section.getString("description") ?: "No description",
+        particleType = section.getString("particleType")?.uppercase()?.let(Particle::valueOf))
   }
+
+  private fun parseAttributes(section: ConfigurationSection): List<ConfigAttribute> =
+      section.getKeys(false).map { key ->
+        val attributeKey =
+            NamespacedKey.fromString(key)
+                ?: throw IllegalArgumentException(
+                    "${section.currentPath} has broken attribute '$key'")
+        val value = section.getDouble(key)
+        ConfigAttribute(attributeKey, value)
+      }
+
 }

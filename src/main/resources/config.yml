@@ -1,19 +1,28 @@
 potions:
   shrink:
     title: 'Крошик'
-    scale: 0.5
+    attributes:
+      "minecraft:scale": 0.5
+      "minecraft:step_height": 2
     color: '#bfff00'
-    duration: 60
+    duration: 20
     description: "Уменьшает в 2 раза"
+    particleType: "firework"
   normal:
     title: 'Нормализатор'
-    scale: 1.0
+    attributes:
+      "minecraft:scale": 0.5
+      "minecraft:step_height": 2
     color: '#00ffff'
-    duration: 60
+    duration: 200
     description: "Нормализует ваш размер"
+    particleType: "cherry_leaves"
   giant:
     title: 'Гигантизм'
-    scale: 2.0
+    attributes:
+      "minecraft:scale": 0.5
+      "minecraft:step_height": 2
     color: '#ff0000'
-    duration: 60
+    duration: 50
     description: "Увеличивает размер в 2 раза"
+    particleType: "composter"

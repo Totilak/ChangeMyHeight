@@ -14,11 +14,9 @@ class ChangeMyHeight : JavaPlugin() {
 
   override fun onEnable() {
     plugin = this
-    saveDefaultConfig()
     storage = ConfigStorage(this.config)
 
-    remainingKey = NamespacedKey(this, "size_remaining")
-    potionNameKey = NamespacedKey(this, "size_potion_name")
+    potionKey = NamespacedKey(this, "potions")
 
     server.pluginManager.registerEvents(PlayerHandler(), this)
 
@@ -40,8 +38,7 @@ class ChangeMyHeight : JavaPlugin() {
     const val GIVE_PERMISSION = "cmh.give"
     const val USE_PERMISSION = "cmh.use"
     const val POTION_SECTION = "potions"
-    lateinit var remainingKey: NamespacedKey
-    lateinit var potionNameKey: NamespacedKey
+    lateinit var potionKey : NamespacedKey
     lateinit var storage: Storage
     lateinit var plugin: ChangeMyHeight
   }
