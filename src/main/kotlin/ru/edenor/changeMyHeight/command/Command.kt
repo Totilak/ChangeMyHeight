@@ -7,45 +7,47 @@ import io.papermc.paper.command.brigadier.Commands.argument
 import io.papermc.paper.command.brigadier.Commands.literal
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver
-import net.kyori.adventure.text.Component
-import org.bukkit.Color
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
+import io.papermc.paper.util.Tick
 import org.bukkit.command.CommandSender
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemFlag
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.persistence.PersistentDataType
 import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.GIVE_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.USE_PERMISSION
+import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.potionNameKey
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.remainingKey
-import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.sizeKey
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresAnyPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.simplyRun
+import ru.edenor.changeMyHeight.data.Potion
+import ru.edenor.changeMyHeight.data.Storage
 
-class Command(private val plugin: ChangeMyHeight) {
+class Command(private val plugin: ChangeMyHeight, private val storage: Storage) {
   fun commands() = arrayOf(cmh)
 
   private val giveSection =
       literal("give")
           .requiresPermission(GIVE_PERMISSION)
           .then(
-              argument("potion", PotionArgumentType())
+              argument("potion", PotionArgumentType(storage))
                   .then(
                       argument("username", ArgumentTypes.playerProfiles()).simplyRun(::givePotion)))
 
+  private val listSection = literal("list").requiresAnyPermission().simplyRun(::sendList)
+
   private val checkSection = literal("check").requiresAnyPermission().simplyRun(::checkPotionEffect)
+
+  private val reloadSection =
+      literal("reload").requiresPermission(GIVE_PERMISSION).simplyRun(::reload)
 
   private val cmh =
       literal("cmh")
           .requiresAnyPermission()
           .simplyRun(::sendHelp)
+          .then(listSection)
           .then(giveSection)
           .then(checkSection)
+          .then(reloadSection)
           .build()
 
   private fun sendHelp(sender: CommandSender) {
@@ -54,12 +56,23 @@ class Command(private val plugin: ChangeMyHeight) {
 
     if (sender.hasPermission(USE_PERMISSION)) {
       sender.sendRichMessage("<green>/cmh check <yellow>- Показать активные эффекты")
+      sender.sendRichMessage("<green>/cmh list <yellow>- Показать доступные зелья")
     }
 
     if (sender.hasPermission(GIVE_PERMISSION)) {
       sender.sendRichMessage(
           "<green>/cmh give <potion_name> <username> <yellow> - Выдать зелье игроку")
+      sender.sendRichMessage("<green>/cmh reload <yellow>- Перезагружает конфигурацию плагина")
     }
+  }
+
+  private fun sendList(sender: CommandSender) {
+    PotionListMessenger.sendList(sender, storage)
+  }
+
+  private fun reload(sender: CommandSender) {
+    plugin.reload()
+    sender.sendRichMessage("<green>Настройки успешно перезагружены")
   }
 
   private fun givePotion(context: CommandContext<CommandSourceStack>) {
@@ -89,26 +102,16 @@ class Command(private val plugin: ChangeMyHeight) {
       return
     }
 
-    val potionType: String = context.getArgument("potion", String::class.java)
+    val potion: Potion = context.getArgument("potion", Potion::class.java)
+    val itemPotion = potion.makePotion()
 
-    val potion =
-        when (potionType.lowercase()) {
-          "shrink" -> makePotion("Зелье уменьшения", Color.LIME, 0.5)
-          "normal" -> makePotion("Зелье нормализации", Color.AQUA, 1.0)
-          "giant" -> makePotion("Зелье гигантизма", Color.RED, 2.0)
-          else -> {
-            sender.sendRichMessage("<red>Неизвестный тип! Используй: shrink, normal, giant")
-            return
-          }
-        }
-
-    val leftover = player.inventory.addItem(potion)
+    val leftover = player.inventory.addItem(itemPotion)
     if (leftover.isNotEmpty()) {
       sender.sendRichMessage("<red>Инвентарь игрока заполнен!")
       return
     }
 
-    sender.sendRichMessage("<green>Выдано '${potionType}' игроку ${player.name}")
+    sender.sendRichMessage("<green>Выдано зелье '${potion.title}' игроку ${player.name}")
   }
 
   private fun checkPotionEffect(sender: CommandSender) {
@@ -119,37 +122,20 @@ class Command(private val plugin: ChangeMyHeight) {
 
     val pdc = sender.persistentDataContainer
     val remaining = pdc.get(remainingKey, PersistentDataType.LONG)
-    val scale = pdc.get(sizeKey, PersistentDataType.DOUBLE)
-    val start = pdc.get(ChangeMyHeight.startKey, PersistentDataType.LONG)
 
-    if (remaining == null || scale == null || start == null) {
+    if (remaining == null) {
       sender.sendRichMessage("<gray>На вас сейчас <red>нет</red> активных эффектов!</gray>")
       return
     }
 
-    val elapsed = System.currentTimeMillis() - start
-    val actualRemaining = (remaining - elapsed).coerceAtLeast(0)
-    val seconds = actualRemaining / 1000
+    val potionName = pdc.get(potionNameKey, PersistentDataType.STRING)!!
+    val potion = storage.getPotion(potionName)!!
+    val potionColor = potion.color
 
-    val effectType =
-        if (scale < 1.0) "<hover:show_text:'Уменьшает игрока'><aqua><u>Крошкинс</u></aqua></hover>"
-        else if (scale > 1.0)
-            "<hover:show_text:'Увеличивает игрока'><u><blue>Гигантизм</blue></u></hover>"
-        else "<hover:show_text:'Нормализует размер игрока'><u><white>Нормализация</u></hover>"
-
+    val timeLeftText = PotionListMessenger.pluralDuration(Tick.of(remaining))
     sender.sendRichMessage(
-        "<green>Эффект:</green> $effectType <gray>(осталось $seconds сек.)</gray>")
-  }
-
-  private fun makePotion(name: String, color: Color, scale: Double): ItemStack {
-    val item = ItemStack(Material.POTION)
-    val meta = item.itemMeta as PotionMeta
-    meta.displayName(Component.text(name))
-    meta.color = color
-    Enchantment.getByKey(NamespacedKey.minecraft("luck"))?.let { meta.addEnchant(it, 1, true) }
-    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-    meta.persistentDataContainer.set(sizeKey, PersistentDataType.DOUBLE, scale)
-    item.itemMeta = meta
-    return item
+        "<green>На вас действует зелье <gray>[</gray>" +
+            "<hover:show_text:'${potion.description}'><${potionColor}>${potion.title}</${potionColor}></hover>" +
+            "<gray>]</gray> - осталось $timeLeftText")
   }
 }
