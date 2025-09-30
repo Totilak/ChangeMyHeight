@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.command.CommandSender
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.GIVE_PERMISSION
+import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.USE_PERMISSION
 
 object CommandExtensions {
   internal fun LiteralArgumentBuilder<CommandSourceStack>.requiresPermission(permission: String) =
@@ -17,7 +18,7 @@ object CommandExtensions {
   ) = this.requires { ctx -> permissions.any { ctx.sender.hasPermission(it) } }
 
   internal fun LiteralArgumentBuilder<CommandSourceStack>.requiresAnyPermission() =
-      this.requiresAnyPermissionOf(GIVE_PERMISSION)
+      this.requiresAnyPermissionOf(GIVE_PERMISSION, USE_PERMISSION)
 
   internal fun LiteralArgumentBuilder<CommandSourceStack>.simplyRun(
       block: (CommandSender) -> Unit
