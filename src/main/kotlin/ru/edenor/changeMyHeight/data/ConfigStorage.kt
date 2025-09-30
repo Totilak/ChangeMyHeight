@@ -7,7 +7,7 @@ import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.POTION_SECTION
 import java.time.Duration
 
-class ConfigStorage(private val config: Configuration) : Storage {
+class ConfigStorage(private var config: Configuration) : Storage {
 
   init {
     reload()
@@ -16,9 +16,9 @@ class ConfigStorage(private val config: Configuration) : Storage {
   override fun getPotions(): List<Potion> {
     val section = config.getConfigurationSection(POTION_SECTION) ?: return listOf()
     return section
-        .getKeys(false)
-        .map { k -> section.getConfigurationSection(k)!! }
-        .map { s -> readTemplate(s) }
+      .getKeys(false)
+      .map { k -> section.getConfigurationSection(k)!! }
+      .map { s -> readTemplate(s) }
   }
 
   override fun getPotion(name: String): Potion? {
@@ -28,17 +28,19 @@ class ConfigStorage(private val config: Configuration) : Storage {
   }
 
   override fun reload() {
-    ChangeMyHeight.plugin.saveDefaultConfig()
-    ChangeMyHeight.plugin.reloadConfig()
+    val plugin = ChangeMyHeight.plugin
+    plugin.saveDefaultConfig()
+    plugin.reloadConfig()
+    config = plugin.config
   }
 
   private fun readTemplate(section: ConfigurationSection): Potion {
     return Potion(
-        name = section.name,
-        title = section.getString("title") ?: "No name",
-        scale = section.getDouble("scale"),
-        color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
-        duration = Duration.ofSeconds(section.getLong("duration")),
-        description = section.getString("description") ?: "No description")
+      name = section.name,
+      title = section.getString("title") ?: "No name",
+      scale = section.getDouble("scale"),
+      color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
+      duration = Duration.ofSeconds(section.getLong("duration")),
+      description = section.getString("description") ?: "No description")
   }
 }
