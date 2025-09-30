@@ -10,7 +10,7 @@ import ru.edenor.changeMyHeight.data.ConfigStorage
 import ru.edenor.changeMyHeight.data.Storage
 import ru.edenor.changeMyHeight.handler.PlayerHandler
 
-class ChangeMyHeight : JavaPlugin(), Listener {
+class ChangeMyHeight : JavaPlugin() {
 
   override fun onEnable() {
     plugin = this
@@ -19,7 +19,7 @@ class ChangeMyHeight : JavaPlugin(), Listener {
     remainingKey = NamespacedKey(this, "size_remaining")
     potionNameKey = NamespacedKey(this, "size_potion_name")
 
-    server.pluginManager.registerEvents(this, this)
+    server.pluginManager.registerEvents(PlayerHandler(), this)
 
     lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
       Command(this, storage).commands().forEach { commands.registrar().register(it) }
@@ -27,8 +27,7 @@ class ChangeMyHeight : JavaPlugin(), Listener {
   }
 
   override fun onDisable() {
-    server.onlinePlayers.forEach { resetScale(it) }
-    activeTasks.values.forEach { it.cancel() }
+    activeTasks.values.forEach(ScheduledTask::cancel)
     activeTasks.clear()
   }
 
@@ -41,7 +40,6 @@ class ChangeMyHeight : JavaPlugin(), Listener {
     const val USE_PERMISSION = "cmh.use"
     const val POTION_SECTION = "potions"
     lateinit var remainingKey: NamespacedKey
-    lateinit var startKey: NamespacedKey
     lateinit var potionNameKey: NamespacedKey
     lateinit var storage: Storage
     lateinit var plugin: ChangeMyHeight
