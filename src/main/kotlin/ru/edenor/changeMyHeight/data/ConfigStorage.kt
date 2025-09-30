@@ -1,12 +1,13 @@
 package ru.edenor.changeMyHeight.data
 
-import java.time.Duration
 import net.kyori.adventure.text.format.TextColor
+import org.bukkit.NamespacedKey
 import org.bukkit.Particle
 import org.bukkit.configuration.Configuration
 import org.bukkit.configuration.ConfigurationSection
 import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.POTION_SECTION
+import java.time.Duration
 
 class ConfigStorage(private var config: Configuration) : Storage {
 
@@ -39,10 +40,24 @@ class ConfigStorage(private var config: Configuration) : Storage {
     return Potion(
         name = section.name,
         title = section.getString("title") ?: "No name",
-        scale = section.getDouble("scale"),
+        attributes =
+            parseAttributes(
+                section.getConfigurationSection("attributes")
+                    ?: throw IllegalArgumentException("${section.name} has no attributes!")),
         color = TextColor.fromHexString(section.getString("color") ?: "#bfff00")!!,
         duration = Duration.ofSeconds(section.getLong("duration")),
         description = section.getString("description") ?: "No description",
         particleType = section.getString("particleType")?.uppercase()?.let(Particle::valueOf))
   }
+
+  private fun parseAttributes(section: ConfigurationSection): List<ConfigAttribute> =
+      section.getKeys(false).map { key ->
+        val attributeKey =
+            NamespacedKey.fromString(key)
+                ?: throw IllegalArgumentException(
+                    "${section.currentPath} has broken attribute '$key'")
+        val value = section.getDouble(key)
+        ConfigAttribute(attributeKey, value)
+      }
+
 }

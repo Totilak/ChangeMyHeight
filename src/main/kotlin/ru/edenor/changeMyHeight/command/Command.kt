@@ -10,12 +10,10 @@ import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListRe
 import io.papermc.paper.util.Tick
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.persistence.PersistentDataType
 import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.GIVE_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.USE_PERMISSION
-import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.potionNameKey
-import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.remainingKey
+import ru.edenor.changeMyHeight.ChangeMyHeightService.getPotionData
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresAnyPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresPermission
 import ru.edenor.changeMyHeight.command.CommandExtensions.simplyRun
@@ -120,22 +118,21 @@ class Command(private val plugin: ChangeMyHeight, private val storage: Storage) 
       return
     }
 
-    val pdc = sender.persistentDataContainer
-    val remaining = pdc.get(remainingKey, PersistentDataType.LONG)
-
-    if (remaining == null) {
+    val potionData = sender.getPotionData()
+    if (potionData.isEmpty()) {
       sender.sendRichMessage("<gray>На вас сейчас <red>нет</red> активных эффектов!</gray>")
       return
     }
 
-    val potionName = pdc.get(potionNameKey, PersistentDataType.STRING)!!
-    val potion = storage.getPotion(potionName)!!
-    val potionColor = potion.color
+    potionData.forEach { (potionName, remaining) ->
+      val potion = storage.getPotion(potionName) ?: return@forEach
+      val potionColor = potion.color
 
-    val timeLeftText = PotionListMessenger.pluralDuration(Tick.of(remaining))
-    sender.sendRichMessage(
-        "<green>На вас действует зелье <gray>[</gray>" +
-            "<hover:show_text:'${potion.description}'><${potionColor}>${potion.title}</${potionColor}></hover>" +
-            "<gray>]</gray> - осталось $timeLeftText")
+      val timeLeftText = PotionListMessenger.pluralDuration(Tick.of(remaining))
+      sender.sendRichMessage(
+          "<green>На вас действует зелье <gray>[</gray>" +
+              "<hover:show_text:'${potion.description}'><${potionColor}>${potion.title}</${potionColor}></hover>" +
+              "<gray>]</gray> - осталось $timeLeftText")
+    }
   }
 }
