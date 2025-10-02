@@ -37,6 +37,7 @@ class ChangeMyHeight : JavaPlugin() {
   companion object {
     const val GIVE_PERMISSION = "cmh.give"
     const val USE_PERMISSION = "cmh.use"
+    const val LIST_PERMISSION = "cmh.list"
     const val POTION_SECTION = "potions"
     lateinit var potionKey : NamespacedKey
     lateinit var storage: Storage

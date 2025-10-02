@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ru.edenor.changeMyHeight.ChangeMyHeight
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.GIVE_PERMISSION
+import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.LIST_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeight.Companion.USE_PERMISSION
 import ru.edenor.changeMyHeight.ChangeMyHeightService.getPotionData
 import ru.edenor.changeMyHeight.command.CommandExtensions.requiresAnyPermission
@@ -31,7 +32,7 @@ class Command(private val plugin: ChangeMyHeight, private val storage: Storage) 
                   .then(
                       argument("username", ArgumentTypes.playerProfiles()).simplyRun(::givePotion)))
 
-  private val listSection = literal("list").requiresAnyPermission().simplyRun(::sendList)
+  private val listSection = literal("list").requiresPermission(LIST_PERMISSION).simplyRun(::sendList)
 
   private val checkSection = literal("check").requiresAnyPermission().simplyRun(::checkPotionEffect)
 
@@ -54,6 +55,9 @@ class Command(private val plugin: ChangeMyHeight, private val storage: Storage) 
 
     if (sender.hasPermission(USE_PERMISSION)) {
       sender.sendRichMessage("<green>/cmh check <yellow>- Показать активные эффекты")
+    }
+
+    if (sender.hasPermission(LIST_PERMISSION)) {
       sender.sendRichMessage("<green>/cmh list <yellow>- Показать доступные зелья")
     }
 

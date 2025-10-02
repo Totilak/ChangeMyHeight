@@ -10,4 +10,6 @@ permissions:
   cmh.give:
     description: Права для выдачи зелий
   cmh.use:
-    description: Права для использований плагина, как игрок
+    description: Права для использований плагина, как игрок (cmh check)
+  cmh.list:
+    description: Права для просмотра списка зелий
