@@ -63,14 +63,14 @@
 potions: #Список зелий
   shrink: #Название зелья
     title: 'Крошик' #То что будет видно игрокам, название с учетом языка сервера
-    attributes: #Список атрибутов
+    attributes: #Список атрибутов, атрибуты можно посмотреть тут 'https://minecraft.wiki/w/Attribute'
       "minecraft:scale": 0.5 #Атрибут, который меняет размер игрока, по умолчанию 1
       "minecraft:step_height": 0.2 #Атрибут высоты авто подъема на блоки, по умолчанию 0.7
       "minecraft:movement_speed": 0.1 # Атрибут скорости игрока, делает быстрее на 0.1
     color: '#bfff00' #Цвет бутылочки зелья и его отображения в чате
     duration: 40 #Длительность зелья, в секундах
     description: "Уменьшает в 2 раза, это плохо?" #Описание зелья
-    particleType: "firework" #Патриклы при использовании
+    particleType: "firework" #Частицы при использовании, список частиц можно посмотреть тут 'https://minecraft.wiki/w/Particles_(Java_Edition)'
   normal:
     title: 'Гравитрон'
     attributes:

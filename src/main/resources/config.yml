@@ -8,7 +8,7 @@ potions: #Список зелий
     color: '#bfff00' #Цвет бутылочки зелья и его отображения в чате
     duration: 40 #Длительность зелья, в секундах
     description: "Уменьшает в 2 раза, это плохо?" #Описание зелья
-    particleType: "firework" #Патриклы при использовании, список патриклов можно посмотреть тут 'https://minecraft.wiki/w/Particles_(Java_Edition)'
+    particleType: "firework" #Частицы при использовании, список частиц можно посмотреть тут 'https://minecraft.wiki/w/Particles_(Java_Edition)'
   normal:
     title: 'Гравитрон'
     attributes:
